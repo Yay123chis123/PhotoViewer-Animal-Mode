@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cat & Dog Picture Generator</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+        img { max-width: 400px; margin: 20px auto; display: block; border-radius: 10px; }
+        button { padding: 10px 20px; margin: 10px; font-size: 16px; }
+        .page { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1001; justify-content: center; align-items: center; }
+        .page > div { background: white; padding: 20px; border-radius: 10px; max-width: 80%; max-height: 80%; overflow: auto; }
+        body.dark { background: #333; color: #fff; }
+        body.dark .page > div { background: #555; color: #fff; }
+    </style>
+</head>
+<body>
+    <h1>Cat & Dog Picture Generator</h1>
+    <button id="menuBtn" style="position: fixed; top: 10px; right: 10px; font-size: 24px; background: none; border: none; cursor: pointer;">☰</button>
+    <div id="menu" style="display: none; position: fixed; top: 50px; right: 10px; background: white; border: 1px solid black; padding: 10px; z-index: 1000;">
+        <button onclick="showSettings()">Settings</button><br>
+        <button onclick="showAI()">Talk to AI</button><br>
+        <button onclick="showCode()">Show Code</button>
+    </div>
+    <div>
+        <button onclick="getCat()">Show Cat</button>
+        <button onclick="getDog()">Show Dog</button>
+    </div>
+    <h2>More Animals</h2>
+    <div>
+        <button onclick="getFox()">Show Fox</button>
+        <button onclick="getBird()">Show Bird</button>
+        <button onclick="getShibe()">Show Shibe</button>
+    </div>
+    <img id="animalImg" src="" alt="Animal will appear here" />
+    <div id="settingsPage" class="page">
+        <div>
+            <h2>Settings</h2>
+            <label><input type="checkbox" id="darkMode"> Dark Mode</label>
+            <br><button onclick="closePage()">Close</button>
+        </div>
+    </div>
+    <div id="aiPage" class="page">
+        <div>
+            <h2>Talk to AI</h2>
+            <div id="chat" style="height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;"></div>
+            <input id="chatInput" style="width: 70%;">
+            <button onclick="sendMessage()">Send</button>
+            <button onclick="closePage()">Close</button>
+        </div>
+    </div>
+    <div id="codePage" class="page">
+        <div>
+            <h2>Website Code</h2>
+            <pre id="codeDisplay" style="white-space: pre-wrap;"></pre>
+            <button onclick="closePage()">Close</button>
+        </div>
+    </div>
+    <script>
+        async function getCat() {
+            const res = await fetch('https://api.thecatapi.com/v1/images/search');
+            const data = await res.json();
+            document.getElementById('animalImg').src = data[0].url;
+            document.getElementById('animalImg').alt = "Random Cat";
+        }
+        async function getDog() {
+            const res = await fetch('https://dog.ceo/api/breeds/image/random');
+            const data = await res.json();
+            document.getElementById('animalImg').src = data.message;
+            document.getElementById('animalImg').alt = "Random Dog";
+        }
+        async function getFox() {
+            const res = await fetch('https://randomfox.ca/floof/');
+            const data = await res.json();
+            document.getElementById('animalImg').src = data.image;
+            document.getElementById('animalImg').alt = "Random Fox";
+        }
+        async function getBird() {
+            const res = await fetch('https://shibe.online/api/birds?count=1&urls=true&httpsUrls=true');
+            const data = await res.json();
+            document.getElementById('animalImg').src = data[0];
+            document.getElementById('animalImg').alt = "Random Bird";
+        }
+        async function getShibe() {
+            const res = await fetch('https://shibe.online/api/shibes?count=1&urls=true&httpsUrls=true');
+            const data = await res.json();
+            document.getElementById('animalImg').src = data[0];
+            document.getElementById('animalImg').alt = "Random Shibe";
+        }
+        document.getElementById('menuBtn').onclick = function() {
+            const menu = document.getElementById('menu');
+            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+        };
+        function showSettings() {
+            hideAllPages();
+            document.getElementById('settingsPage').style.display = 'flex';
+            document.getElementById('menu').style.display = 'none';
+        }
+        function showAI() {
+            hideAllPages();
+            document.getElementById('aiPage').style.display = 'flex';
+            document.getElementById('menu').style.display = 'none';
+        }
+        function showCode() {
+            hideAllPages();
+            document.getElementById('codePage').style.display = 'flex';
+            document.getElementById('codeDisplay').textContent = document.documentElement.outerHTML;
+            document.getElementById('menu').style.display = 'none';
+        }
+        function closePage() {
+            hideAllPages();
+        }
+        function hideAllPages() {
+            document.getElementById('settingsPage').style.display = 'none';
+            document.getElementById('aiPage').style.display = 'none';
+            document.getElementById('codePage').style.display = 'none';
+        }
+        document.getElementById('darkMode').onchange = function() {
+            document.body.classList.toggle('dark', this.checked);
+        };
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const chat = document.getElementById('chat');
+            if (input.value.trim()) {
+                chat.innerHTML += '<p>You: ' + input.value + '</p>';
+                setTimeout(() => {
+                    chat.innerHTML += '<p>AI: ' + getAIResponse(input.value) + '</p>';
+                    chat.scrollTop = chat.scrollHeight;
+                }, 1000);
+                input.value = '';
+            }
+        }
+        function getAIResponse(message) {
+            if (message.toLowerCase().includes('cat')) return 'Cats are awesome! They have 18 toes.';
+            if (message.toLowerCase().includes('dog')) return 'Dogs are loyal companions. There are over 300 breeds.';
+            if (message.toLowerCase().includes('fox')) return 'Foxes are clever and have excellent hearing.';
+            if (message.toLowerCase().includes('bird')) return 'Birds can fly and have feathers. There are about 10,000 species.';
+            if (message.toLowerCase().includes('shibe')) return 'Shiba Inus are spirited dogs from Japan.';
+            return 'I\'m a simple AI. Ask me about animals!';
+        }
+    </script>
+</body>
+</html>
